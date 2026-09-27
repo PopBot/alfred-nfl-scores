@@ -8,6 +8,34 @@ Live scores, division standings, player stats, and team statistics right in your
 
 ---
 
+## 📸 Previews
+
+### Live & Weekly Scores (`nfl`)
+Real-time game clock, quarter, down & distance, red zone alerts, dual team matchup logos, and TV networks.
+<p align="center">
+  <img src="images/nfl-preview.png" alt="NFL Scores Live Preview" width="680">
+</p>
+
+### Division Standings (`nfls`)
+Hierarchical standings for all 8 NFL divisions across the AFC and NFC.
+<p align="center">
+  <img src="images/nfls-preview.png" alt="NFL Standings Preview" width="680">
+</p>
+
+### Player Statistics & Headshots (`nflp {name}`)
+Live player headshots cached from ESPN CDN with position-tailored stats (QB, RB, WR, TE, K, DEF).
+<p align="center">
+  <img src="images/nflp-preview.png" alt="NFL Player Stats Preview" width="680">
+</p>
+
+### Team Hub & Modifiers (`nflt {query}`)
+Season records and split offensive (`⌘`) & defensive (`⌥`) statistical previews.
+<p align="center">
+  <img src="images/nflt-preview.png" alt="NFL Team Stats Preview" width="680">
+</p>
+
+---
+
 ## ⚡ Features
 
 - **🏈 Live Game Tracking**:
@@ -20,11 +48,11 @@ Live scores, division standings, player stats, and team statistics right in your
   - All 8 NFL divisions grouped across AFC & NFC (`nfls`).
   - Visual division headers with W-L records, point differential, streak, PF, and PA.
 - **🏃‍♂️ Player Statistics Search**:
-  - Real-time player headshots downloaded from ESPN's CDN and cached locally (`nflp {name}`).
+  - Real-time player headshots downloaded from ESPN's CDN and cached locally in Alfred's cache (`nflp {name}`).
   - Positional stat formatting for QBs, RBs, WRs, TEs, Kickers, and Defense.
 - **🛡️ Team Hub**:
   - Browse or search all 32 NFL franchises (`nflt {query}`).
-  - Hold `⌘` (Cmd) for offensive stats (Yards, TDs, Points Per Game).
+  - Hold `⌘` (Cmd) for offensive stats (Points Per Game, Passing YDS, Rushing YDS).
   - Hold `⌥` (Alt) for defensive stats (Sacks, Interceptions, Forced Fumbles, Tackles).
 - **🔋 Zero Dependencies**:
   - Pre-bundled lightweight HTTP runtime.
@@ -35,8 +63,8 @@ Live scores, division standings, player stats, and team statistics right in your
 
 ## 🚀 Installation
 
-1. Download the latest **`NFL Scores.alfredworkflow`** from the [Releases](https://github.com/PopBot/nfl-scores/releases) page.
-2. Double-click the downloaded file to install it into Alfred.
+1. Download the latest **`NFL.Scores.alfredworkflow`** from the [Releases](https://github.com/PopBot/nfl-scores/releases) page.
+2. Double-click the downloaded file to install it into Alfred 5.
 3. Type `nfl` into Alfred!
 
 ---
