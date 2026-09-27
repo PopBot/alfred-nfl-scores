@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.popbot.nfl-scores</string>
+	<key>connections</key>
+	<dict>
+		<key>61D0008B-93B9-42C3-B1D6-F7C8EA595AFA</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>0AB67A54-A596-4373-BE41-210D659C8516</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<true/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>PopBot</string>
+	<key>description</key>
+	<string>NFL scores, standings, player stats, and team stats.</string>
+	<key>name</key>
+	<string>NFL Scores</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>nfl</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>🏈 Loading…</string>
+				<key>script</key>
+				<string>python3 nfl.py "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Scores · nfls standings · nflp player · nflt team</string>
+				<key>title</key>
+				<string>NFL Scores</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>61D0008B-93B9-42C3-B1D6-F7C8EA595AFA</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>browser</key>
+				<string></string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>0AB67A54-A596-4373-BE41-210D659C8516</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>## 🏈 NFL Scores — Alfred Workflow
+
+### Usage
+| Type this | What you get |
+|-----------|-------------|
+| `nfl`          | Current week's live, upcoming &amp; final scores |
+| `nfls`         | Standings grouped by all 8 NFL divisions |
+| `nflp {name}`  | Player stats &amp; headshots (e.g. `nflp mahomes`) |
+| `nflt {query}` | Team stats (e.g. `nflt chiefs`) |
+
+### Modifier Keys
+- **Scores (`nfl`)**:
+  - `⌘ Enter`: Open Game Box Score
+  - `⌥ Enter`: Open Play-by-Play
+- **Team Stats (`nflt`)**:
+  - Default: Season record, division rank, streak, PF, PA
+  - `⌘`: Team Offense (Points/Game, Passing YDS &amp; TDs, Rushing YDS)
+  - `⌥`: Team Defense (Sacks, Interceptions, Forced Fumbles, Tackles)
+- **Player Stats (`nflp`)**:
+  - `⌘ Enter`: Open Player Game Log
+  - `⌥ Enter`: Open Split Stats
+
+### Features
+- **Dual team matchup logos** — away + home side-by-side on a 64x64 canvas
+- **Live game situations** — quarter, clock, down &amp; distance, yard line, and red zone alerts
+- **Live auto-refresh** — scores update every 5s during live games
+- **Player headshots** — live from ESPN CDN, cached 7 days locally
+- **Timezone auto-detect** — game times formatted in your Mac's local timezone
+- **No API key needed** — free public ESPN API endpoints
+- **Zero dependencies** — pure-Python PNG compositing and bundled HTTP libraries
+
+Built with ❤️ for Alfred 5.
+</string>
+	<key>uidata</key>
+	<dict>
+		<key>0AB67A54-A596-4373-BE41-210D659C8516</key>
+		<dict>
+			<key>xpos</key>
+			<real>490.0</real>
+			<key>ypos</key>
+			<real>50.0</real>
+		</dict>
+		<key>61D0008B-93B9-42C3-B1D6-F7C8EA595AFA</key>
+		<dict>
+			<key>xpos</key>
+			<real>150.0</real>
+			<key>ypos</key>
+			<real>50.0</real>
+		</dict>
+	</dict>
+	<key>version</key>
+	<string>1.0.0</string>
+	<key>webaddress</key>
+	<string>https://github.com/PopBot/nfl-scores</string>
+</dict>
+</plist>
