@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.popbot.nfl-scores</string>
+	<string>com.popbot.alfred-nfl-scores</string>
 	<key>connections</key>
 	<dict>
 		<key>61D0008B-93B9-42C3-B1D6-F7C8EA595AFA</key>
@@ -145,6 +145,6 @@ Built with ❤️ for Alfred 5.
 	<key>version</key>
 	<string>1.0.0</string>
 	<key>webaddress</key>
-	<string>https://github.com/PopBot/nfl-scores</string>
+	<string>https://github.com/PopBot/alfred-nfl-scores</string>
 </dict>
 </plist>

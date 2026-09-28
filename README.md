@@ -63,7 +63,7 @@ Season records and split offensive (`⌘`) & defensive (`⌥`) statistical previ
 
 ## 🚀 Installation
 
-1. Download the latest **`NFL.Scores.alfredworkflow`** from the [Releases](https://github.com/PopBot/nfl-scores/releases) page.
+1. Download the latest **`NFL.Scores.alfredworkflow`** from the [Releases](https://github.com/PopBot/alfred-nfl-scores/releases) page.
 2. Double-click the downloaded file to install it into Alfred 5.
 3. Type `nfl` into Alfred!
 
@@ -97,8 +97,8 @@ Season records and split offensive (`⌘`) & defensive (`⌥`) statistical previ
 ## 🛠️ Building from Source
 
 ```bash
-git clone https://github.com/PopBot/nfl-scores.git
-cd nfl-scores
+git clone https://github.com/PopBot/alfred-nfl-scores.git
+cd alfred-nfl-scores
 
 # Download all 32 team logos and package into .alfredworkflow
 python3 build.py
