@@ -25,7 +25,7 @@ WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
 # Standard Alfred 5 workflow cache directory ($alfred_workflow_cache)
 # Fallback to standard macOS Alfred cache path or local .cache
 DEFAULT_ALFRED_CACHE = os.path.expanduser(
-    "~/Library/Caches/com.runningwithcrayons.Alfred/Workflow Data/com.popbot.nfl-scores"
+    "~/Library/Caches/com.runningwithcrayons.Alfred/Workflow Data/com.popbot.alfred-nfl-scores"
 )
 CACHE_DIR = os.environ.get("alfred_workflow_cache") or DEFAULT_ALFRED_CACHE
 HEADSHOT_DIR = os.path.join(CACHE_DIR, "headshots")
