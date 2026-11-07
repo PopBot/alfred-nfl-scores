@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils import (
     alfred_error, alfred_output,
@@ -24,15 +25,17 @@ STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/football/nfl/standings
 def search_teams(query: str) -> list[dict]:
     q = query.lower().strip()
     if not q:
-        return TEAMS
+        return list(TEAMS)
+    words = q.split()
     return [
         t for t in TEAMS
-        if q in t["name"].lower()
-        or q in t["city"].lower()
-        or q in t["nickname"].lower()
-        or q in t["abbreviation"].lower()
-        or q in t["division"].lower()
-        or q in t["conference"].lower()
+        if all(
+            w in (
+                f"{t['name']} {t['city']} {t['nickname']} "
+                f"{t['abbreviation']} {t['division']} {t['conference']} {t.get('conference_abbr', '')}"
+            ).lower()
+            for w in words
+        )
     ]
 
 
@@ -55,9 +58,19 @@ def fetch_standings_map() -> dict[str, dict]:
                 stats = {}
                 for s in entry.get("stats", []):
                     name = s.get("name")
+                    stype = s.get("type", "")
                     val = s.get("displayValue")
-                    if name and val is not None:
+                    if val is None:
+                        continue
+                    if stype:
+                        stats[stype] = val
+                    if name and ("_" not in stype or name not in stats):
                         stats[name] = val
+                win_pct_raw = stats.get("winPercent", "0")
+                try:
+                    win_pct = float(win_pct_raw)
+                except ValueError:
+                    win_pct = 0.0
                 teams_map[tid] = {
                     "record": stats.get("overall", f"{stats.get('wins', 0)}-{stats.get('losses', 0)}"),
                     "diff": stats.get("pointDifferential") or stats.get("differential", "0"),
@@ -66,6 +79,7 @@ def fetch_standings_map() -> dict[str, dict]:
                     "pa": stats.get("pointsAgainst", "0"),
                     "div_rec": stats.get("divisionRecord", "—"),
                     "seed": stats.get("playoffSeed", "—"),
+                    "win_pct": win_pct,
                 }
     return teams_map
 
@@ -167,13 +181,47 @@ def main():
         return
 
     standings_map = fetch_standings_map()
-    items = []
-    # If more than 8 results matched (e.g. no query or general search), only fetch stats for top matches or on-demand
-    for t in matched_teams[:16]:
-        items.append(build_team_item(t, standings_map))
 
+    # Sort by win percentage descending, then point differential descending
+    def team_sort_key(t: dict):
+        std = standings_map.get(str(t["id"]), {})
+        win_pct = std.get("win_pct", 0.0)
+        try:
+            diff = int(str(std.get("diff", "0")).replace("+", ""))
+        except ValueError:
+            diff = 0
+        return (-win_pct, -diff, t["name"])
+
+    matched_teams.sort(key=team_sort_key)
+
+    # Fetch team stats concurrently for all matched teams (up to 32)
+    results_by_id: dict[str, dict] = {}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        future_map = {
+            pool.submit(build_team_item, t, standings_map): str(t["id"])
+            for t in matched_teams
+        }
+        for future in as_completed(future_map):
+            tid = future_map[future]
+            try:
+                results_by_id[tid] = future.result()
+            except Exception:
+                pass
+
+    items = [results_by_id[str(t["id"])] for t in matched_teams if str(t["id"]) in results_by_id]
     alfred_output(items)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        import json as _json, traceback
+        print(_json.dumps({"items": [{
+            "title": "⚠️ NFL Team script error",
+            "subtitle": str(exc),
+            "valid": False,
+            "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")},
+            "text": {"copy": traceback.format_exc()},
+        }]}))
+        sys.exit(0)

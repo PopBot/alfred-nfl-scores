@@ -101,30 +101,57 @@ def format_player_stats(labels: list[str], stats: list[str]) -> str:
         rec_td = stats[8]
         return f"{rush_yds} RUSH YDS ({rush_td} TD, {rush_avg} YPC) · {rec} REC ({rec_yds} YDS, {rec_td} TD)"
 
-    # 3. Wide Receiver / Tight End: REC, YDS, AVG, TD, LNG
-    if len(labels) >= 4 and labels[0] == "REC" and labels[1] == "YDS":
+    # 3. Wide Receiver / Tight End:
+    # ESPN returns either ['REC', 'TGTS', 'YDS', 'AVG', 'TD', 'LNG', ...]
+    # or ['REC', 'YDS', 'AVG', 'TD', 'LNG', ...]
+    if len(labels) >= 4 and labels[0] == "REC" and ("YDS" in labels[:3]):
         rec = stats[0]
-        rec_yds = stats[1]
-        rec_avg = stats[2]
-        rec_td = stats[3]
-        return f"{rec} REC · {rec_yds} YDS · {rec_td} TD · {rec_avg} AVG"
+        if labels[1] == "TGTS" and len(labels) >= 5:
+            tgts = stats[1]
+            rec_yds = stats[2]
+            rec_avg = stats[3]
+            rec_td = stats[4]
+            return f"{rec} REC ({tgts} TGTS) · {rec_yds} YDS · {rec_td} TD · {rec_avg} AVG"
+        else:
+            rec_yds = stats[1]
+            rec_avg = stats[2]
+            rec_td = stats[3]
+            return f"{rec} REC · {rec_yds} YDS · {rec_td} TD · {rec_avg} AVG"
 
-    # 4. Defense: SOLO, AST, TOT, SACK, SCKYDS, INT, etc.
+    # 4. Defense: TOT, SOLO, AST, SACK, FF, FR, YDS, INT, ..., PD
     pairs = dict(zip(labels, stats))
     if any(k in pairs for k in ("TKL", "TOT", "SACK", "SCK", "SOLO")):
         tkl = pairs.get("TOT", pairs.get("TKL", pairs.get("SOLO", "—")))
         sck = pairs.get("SACK", pairs.get("SCK", "—"))
         int_ = pairs.get("INT", "—")
+        pd = pairs.get("PD")
         ff = pairs.get("FF", "—")
-        return f"{tkl} TKL · {sck} SACKS · {int_} INT · {ff} FF"
+        sub = f"{tkl} TKL · {sck} SACKS · {int_} INT · {ff} FF"
+        if pd is not None and pd != "0":
+            sub += f" · {pd} PD"
+        return sub
 
-    # 5. Kicker: FGM, FGA, FG%, etc.
-    if any(k in pairs for k in ("FGM", "FG%", "PTS")):
-        fgm = pairs.get("FGM", "—")
-        fga = pairs.get("FGA", "—")
+    # 5. Kicker: ESPN returns ['FG%', 'FG', '1-19', ..., 'LNG', 'XPM', 'XPA', 'PTS']
+    # or ['FGM', 'FGA', 'FG%', ...]
+    if any(k in pairs for k in ("FG", "FGM", "FG%", "PTS")):
+        fg = pairs.get("FG")
+        if not fg:
+            fgm = pairs.get("FGM", "—")
+            fga = pairs.get("FGA", "—")
+            fg = f"{fgm}/{fga}"
+        else:
+            fg = fg.replace("-", "/")
         pct = pairs.get("FG%", "—")
         lng = pairs.get("LNG", "—")
-        return f"{fgm}/{fga} FG ({pct}%) · Long: {lng}"
+        pts = pairs.get("PTS")
+        xpm = pairs.get("XPM")
+        xpa = pairs.get("XPA")
+        sub = f"{fg} FG ({pct}%) · Long: {lng}"
+        if xpm is not None and xpa is not None:
+            sub += f" · {xpm}/{xpa} XP"
+        if pts is not None:
+            sub += f" · {pts} PTS"
+        return sub
 
     # Fallback
     return " · ".join(f"{lbl}: {val}" for lbl, val in list(zip(labels, stats))[:5])
@@ -210,4 +237,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        import json as _json, traceback
+        print(_json.dumps({"items": [{
+            "title": "⚠️ NFL Player script error",
+            "subtitle": str(exc),
+            "valid": False,
+            "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")},
+            "text": {"copy": traceback.format_exc()},
+        }]}))
+        sys.exit(0)

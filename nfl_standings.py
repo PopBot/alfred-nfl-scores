@@ -33,11 +33,22 @@ def header(division_name: str) -> dict:
 
 
 def stat_map(stats_list: list[dict]) -> dict[str, str]:
+    """
+    Build a lookup map of team standings statistics without overwriting
+    overall/total stats with split-specific stats (e.g., homerecord_wins).
+    """
     res = {}
     for s in stats_list:
         name = s.get("name")
+        stype = s.get("type", "")
         val = s.get("displayValue")
-        if name and val is not None:
+        if val is None:
+            continue
+        if stype:
+            res[stype] = val
+        # Only set by `name` if it's a primary stat (no underscore split prefix)
+        # or if `name` hasn't been recorded yet.
+        if name and ("_" not in stype or name not in res):
             res[name] = val
     return res
 
@@ -109,6 +120,7 @@ def fetch_standings_data():
 
 
 def main():
+    query = sys.argv[1].strip().lower() if len(sys.argv) > 1 else ""
     try:
         data = fetch_standings_data()
     except Exception as e:
@@ -125,6 +137,27 @@ def main():
 
     items = []
     for div_name in DIVISION_ORDER:
+        if query and not all(w in div_name.lower() for w in query.split()):
+            # Also check if any team in this division matches query
+            entries = divisions_dict.get(div_name, [])
+            matching_entries = [
+                (rank, entry)
+                for rank, entry in enumerate(entries, 1)
+                if all(
+                    w in (
+                        f"{div_name} {entry.get('team', {}).get('displayName', '')} "
+                        f"{entry.get('team', {}).get('abbreviation', '')}"
+                    ).lower()
+                    for w in query.split()
+                )
+            ]
+            if not matching_entries:
+                continue
+            items.append(header(div_name))
+            for rank, entry in matching_entries:
+                items.append(team_item(rank, entry))
+            continue
+
         entries = divisions_dict.get(div_name, [])
         if not entries:
             continue
@@ -132,8 +165,28 @@ def main():
         for rank, entry in enumerate(entries, 1):
             items.append(team_item(rank, entry))
 
+    if not items:
+        alfred_output([{
+            "title": f"No NFL standings matching '{query}'",
+            "subtitle": "Try e.g. 'nfls afc', 'nfls nfc west', or 'nfls bills'",
+            "valid": False,
+            "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")}
+        }])
+        return
+
     alfred_output(items)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        import json as _json, traceback
+        print(_json.dumps({"items": [{
+            "title": "⚠️ NFL Standings script error",
+            "subtitle": str(exc),
+            "valid": False,
+            "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")},
+            "text": {"copy": traceback.format_exc()},
+        }]}))
+        sys.exit(0)

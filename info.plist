@@ -98,9 +98,10 @@
 | Type this | What you get |
 |-----------|-------------|
 | `nfl`          | Current week's live, upcoming &amp; final scores |
-| `nfls`         | Standings grouped by all 8 NFL divisions |
+| `nfl {filter}` | Filter weekly scores by team, network, or status (e.g. `nfl sf`, `nfl live`) |
+| `nfls [query]` | Standings grouped by all 8 NFL divisions (e.g. `nfls`, `nfls afc`) |
 | `nflp {name}`  | Player stats &amp; headshots (e.g. `nflp mahomes`) |
-| `nflt {query}` | Team stats (e.g. `nflt chiefs`) |
+| `nflt [query]` | Team stats sorted by win % (e.g. `nflt`, `nflt chiefs`) |
 
 ### Modifier Keys
 - **Scores (`nfl`)**:

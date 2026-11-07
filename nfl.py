@@ -18,22 +18,30 @@ import sys
 
 
 def main():
-    query = sys.argv[1].strip() if len(sys.argv) > 1 else ""
+    raw_arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    query = raw_arg.strip()
+    q_low = query.lower()
 
     # ── Route based on query prefix ──────────────────────────────────────────
-    if query.startswith("s"):
-        # nfls → standings
+    # If raw_arg starts with a leading space (e.g. "nfl sf" -> " sf"), treat it
+    # as a scoreboard filter rather than a subcommand prefix ("nfls").
+    has_leading_space = raw_arg.startswith(" ")
+
+    if not has_leading_space and (q_low == "s" or q_low.startswith("s ")):
+        # nfls [div/conf] → standings
+        standings_query = query[1:].strip()
+        sys.argv = [sys.argv[0], standings_query]
         from nfl_standings import main as standings_main
         standings_main()
 
-    elif query.startswith("p"):
+    elif not has_leading_space and (q_low == "p" or q_low.startswith("p ")):
         # nflp {name} → player search
         player_query = query[1:].strip()
         sys.argv = [sys.argv[0], player_query]
         from nfl_player import main as player_main
         player_main()
 
-    elif query.startswith("t"):
+    elif not has_leading_space and (q_low == "t" or q_low.startswith("t ")):
         # nflt {query} → team search
         team_query = query[1:].strip()
         sys.argv = [sys.argv[0], team_query]
@@ -41,8 +49,8 @@ def main():
         team_main()
 
     else:
-        # Default: show current week's scores
-        scores_main()
+        # Default: show current week's scores (with optional filter)
+        scores_main(query)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -210,7 +218,40 @@ def format_game_item(event: dict) -> tuple[dict, int]:
         }, 2
 
 
-def scores_main():
+def event_matches_filter(event: dict, query: str) -> bool:
+    if not query:
+        return True
+    q = query.lower().strip()
+    comp = event.get("competitions", [{}])[0]
+    status_state = comp.get("status", {}).get("type", {}).get("state", "")
+    if q == "live":
+        return status_state == "in"
+    if q in ("final", "post"):
+        return status_state == "post"
+    if q in ("upcoming", "pre"):
+        return status_state == "pre"
+
+    haystack_parts = [
+        event.get("name", ""),
+        event.get("shortName", ""),
+    ]
+    for c in comp.get("competitors", []):
+        t = c.get("team", {})
+        haystack_parts.extend([
+            t.get("displayName", ""),
+            t.get("shortDisplayName", ""),
+            t.get("name", ""),
+            t.get("location", ""),
+            t.get("abbreviation", ""),
+        ])
+    for b in comp.get("broadcasts", []):
+        haystack_parts.extend(b.get("names", []))
+
+    haystack = " ".join(haystack_parts).lower()
+    return all(word in haystack for word in q.split())
+
+
+def scores_main(filter_query: str = ""):
     key = "nfl_scoreboard"
     data = cache_get(key, CACHE_TTL)
     if not data:
@@ -226,10 +267,15 @@ def scores_main():
                 return
 
     events = data.get("events", [])
+    if filter_query:
+        events = [ev for ev in events if event_matches_filter(ev, filter_query)]
+
     if not events:
+        msg = f"No NFL games matching '{filter_query}'" if filter_query else "No NFL games scheduled for this week 🏈"
+        sub = "Try searching by team name, abbreviation, or 'live' / 'final'" if filter_query else "Check back soon for upcoming matchups"
         alfred_output([{
-            "title": "No NFL games scheduled for this week 🏈",
-            "subtitle": "Check back soon for upcoming matchups",
+            "title": msg,
+            "subtitle": sub,
             "valid": False,
             "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")}
         }])
@@ -256,4 +302,15 @@ def scores_main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        import traceback
+        print(json.dumps({"items": [{
+            "title": "⚠️ NFL script error",
+            "subtitle": str(exc),
+            "valid": False,
+            "icon": {"path": os.path.join(WORKFLOW_DIR, "icon.png")},
+            "text": {"copy": traceback.format_exc()},
+        }]}))
+        sys.exit(0)
