@@ -74,9 +74,10 @@ Season records and split offensive (`⌘`) & defensive (`⌥`) statistical previ
 | Keyword | Action |
 |---|---|
 | `nfl` | Current week's scores (Live $\rightarrow$ Upcoming $\rightarrow$ Final) |
-| `nfls` | Standings grouped by all 8 NFL divisions |
-| `nflp {name}` | Player search & stats (e.g. `nflp mahomes`, `nflp henry`) |
-| `nflt {query}` | Team search & stats (e.g. `nflt chiefs`, `nflt 49ers`) |
+| `nfl {filter}` | Filter current week's scores by team, TV network, or status (`nfl sf`, `nfl live`, `nfl final`) |
+| `nfls [filter]` | Standings grouped by all 8 NFL divisions (optional filter: `nfls afc`, `nfls nfc west`) |
+| `nflp {name}` | Player search & stats (e.g. `nflp mahomes`, `nflp henry`, `nflp jefferson`) |
+| `nflt [query]` | Team search & stats sorted by win % (e.g. `nflt`, `nflt chiefs`, `nflt afc north`) |
 
 ### Action Modifiers
 - **Scores (`nfl`)**:
